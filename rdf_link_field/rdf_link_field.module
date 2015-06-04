@@ -15,7 +15,7 @@ function rdf_link_field_menu(){
     'type' => MENU_CALLBACK,
     'page callback' => 'rdf_link_field_rdf_model',
     'page arguments' => array(0, 1, 'xml'),
-    'access arguments' => array('view content'),
+    'access arguments' => array('access content'),
     'delivery callback' => 'rdf_link_field_serialize',
   );
   return $items;
@@ -79,7 +79,6 @@ function rdf_link_field_rdf_model($entity_type, $entity, $format = 'xml') {
  *    'data'    => a string of data to use as the response body
  */
 function rdf_link_field_serialize($response) {
-
   // Menu status constants are integers; page content is a string or array.
   if (is_int($response)) {
     switch ($response) {
@@ -87,6 +86,10 @@ function rdf_link_field_serialize($response) {
         _rdf_link_field_deliver_menu_not_found();
         return;
 
+      case MENU_ACCESS_DENIED:
+      default:     
+        _rdf_link_field_deliver_menu_access_denied();
+        return;
     }
   }
 
@@ -101,6 +104,42 @@ function rdf_link_field_serialize($response) {
     print $response;
   }
 
+  drupal_exit();
+}
+
+/** 
+ * Handle responses where the menu path should not be accessed
+ * @see drupal_deliver_html_page() from includes/menu.inc
+ */
+function _rdf_link_field_deliver_menu_access_denied() {
+  // Print a 403 page.
+  drupal_add_http_header('Status', '403 Forbidden');
+  watchdog('access denied', check_plain($_GET['q']), NULL, WATCHDOG_WARNING);
+
+  // Keep old path for reference, and to allow forms to redirect to it.
+  if (!isset($_GET['destination'])) {
+    $_GET['destination'] = $_GET['q'];
+  }
+
+  $path = drupal_get_normal_path(variable_get('site_403', ''));
+  if ($path && $path != $_GET['q']) {
+    // Custom 403 handler. Set the active item in case there are tabs to
+    // display or other dependencies on the path.
+    menu_set_active_item($path);
+    $return = menu_execute_active_handler($path, FALSE);
+  }
+
+  if (empty($return) || $return == MENU_NOT_FOUND || $return == MENU_ACCESS_DENIED) {
+    // Standard 403 handler.
+    drupal_set_title(t('Access denied'));
+    $return = t('You are not authorized to access this page.');
+  }
+
+  print drupal_render_page($return);
+  
+  // Perform end-of-request tasks.
+  drupal_page_footer();
+  
   drupal_exit();
 }
 
