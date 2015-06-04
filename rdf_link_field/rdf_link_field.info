@@ -1,0 +1,12 @@
+name = RDF Link field
+description = Provide a lik to a node's RDF from the node view
+core = 7.x
+package = Features
+version = 7.x-1.0
+project = rdf_link_field
+dependencies[] = ctools
+dependencies[] = ds
+dependencies[] = rdfx
+features[ctools][] = ds:ds:1
+features[ds_fields][] = rdf_link
+features[features_api][] = api:1

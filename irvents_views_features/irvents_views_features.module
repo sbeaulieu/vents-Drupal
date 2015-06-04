@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the irvents-views-features feature.
+ */
+
+include_once 'irvents_views_features.features.inc';

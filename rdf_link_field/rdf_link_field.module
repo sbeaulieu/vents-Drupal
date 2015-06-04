@@ -1,0 +1,147 @@
+<?php
+/**
+ * @file
+ * Code for the RDF Link field feature.
+ */
+
+include_once 'rdf_link_field.features.inc';
+
+/**
+ * Implements hook_menu().
+ */
+function rdf_link_field_menu(){
+
+  $items['node/%/rdf'] = array(
+    'type' => MENU_CALLBACK,
+    'page callback' => 'rdf_link_field_rdf_model',
+    'page arguments' => array(0, 1, 'xml'),
+    'access arguments' => array('view content'),
+    'delivery callback' => 'rdf_link_field_serialize',
+  );
+  return $items;
+}
+
+
+/**
+ * Implements hook_url_inbound_alter().
+ *
+ * Make /node/3515.rdf resolve to /node/3515/rdf
+ */
+function rdf_link_field_url_inbound_alter(&$path, $original_path, $path_language) {
+  $pattern = '|^node/([0-9]+)\.(.*)|';
+  if (preg_match($pattern, $path, $matches)) {
+    $path = 'node/' . $matches[1] . '/' . $matches[2];
+  }
+}
+
+/**
+ * Return RDF model.
+ *
+ * @param String $entity_type
+ *   The entity type
+ *
+ * @param object $entity
+ *   A Drupal entity
+ *
+ * @param String $format
+ *   A format
+ *
+ * @return mixed
+ *   Either an object representative of the model or MENU_NOT_FOUND
+ */
+function rdf_link_field_rdf_model($entity_type, $entity, $format = 'xml') {
+  
+  $response = new stdClass();
+
+  switch($format) {
+    case 'xml':
+    default:
+      $model = rdfx_get_rdf_model($entity_type, $entity);
+
+      $response->headers = array(
+        'Content-Type' => 'application/rdf+xml'
+      );
+      
+      $serializer = ARC2::getSer('RDFXML', array('ns' => $model->ns));
+      $response->data = $serializer->getSerializedIndex($model->index);
+      return $response;
+  }
+
+  return MENU_NOT_FOUND;
+}
+
+/**
+ * Delivery callback.
+ *
+ * @param object $response
+ *   A string of html or an object with the following properties
+ *    'headers' => an array of response headers[name:value]
+ *    'data'    => a string of data to use as the response body
+ */
+function rdf_link_field_serialize($response) {
+
+  // Menu status constants are integers; page content is a string or array.
+  if (is_int($response)) {
+    switch ($response) {
+      case MENU_NOT_FOUND:
+        _rdf_link_field_deliver_menu_not_found();
+        return;
+
+    }
+  }
+
+  // Handle response.
+  if( is_object($response) && isset($response->headers) && isset($response->data)){
+    foreach($response->headers as $header => $value){
+      drupal_add_http_header($header, $value);
+    }
+    print $response->data;
+  } else {
+    drupal_add_http_header('Content-Type', 'text/html; charset=utf-8');
+    print $response;
+  }
+
+  drupal_exit();
+}
+
+/** 
+ * Handle responses where the menu path is not found.
+ * @see drupal_deliver_html_page() from includes/menu.inc
+ */
+function _rdf_link_field_deliver_menu_not_found(){
+
+  // Print a 404 page.
+  drupal_add_http_header('Status', '404 Not Found');
+  watchdog('page not found', check_plain($_GET['q']), NULL, WATCHDOG_WARNING);
+
+  // Check for and return a fast 404 page if configured.
+  drupal_fast_404();
+
+  // Keep old path for reference, and to allow forms to redirect to it.
+  if (!isset($_GET['destination'])) {
+    $_GET['destination'] = $_GET['q'];
+  }
+
+  $path = drupal_get_normal_path(variable_get('site_404', ''));
+  if ($path && $path != $_GET['q']) {
+    // Custom 404 handler. Set the active item in case there are tabs to
+    // display, or other dependencies on the path.
+    menu_set_active_item($path);
+    $return = menu_execute_active_handler($path, FALSE);
+  }
+
+  if (empty($return) || $return == MENU_NOT_FOUND || $return == MENU_ACCESS_DENIED) {
+    // Standard 404 handler.
+    drupal_set_title(t('Page not found'));
+    $return = t('The requested page "@path" could not be found.', array('@path' => request_uri()));
+  }
+
+  drupal_set_page_content($return);
+  $page = element_info('page');
+  print drupal_render_page($page);
+  
+  // Perform end-of-request tasks.
+  drupal_page_footer();
+  
+  drupal_exit();
+}

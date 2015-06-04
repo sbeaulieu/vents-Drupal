@@ -1,0 +1,134 @@
+<?php
+
+/**
+ * This is example code for a Drupal 7 to Drupal 7 migration. This won't actually
+ * work without defining the referenced vocabularies, content types, and fields
+ * on each side.
+ */
+
+
+/**
+ * Implements hook_flush_caches().
+ */
+function migrate_irvents_flush_caches() {
+  migrate_irvents_register_migrations();
+}
+
+/**
+ * Register all D7->D7 migrations.
+ */
+function migrate_irvents_register_migrations() {
+  /**
+   * Each migration being registered takes an array of arguments, some required
+   * and some optional. Start with the common arguments required by all - the
+   * source_connection (connection key, set up in settings.php, pointing to
+   * the Drupal 7 database) and source_version (major version of Drupal).
+   */
+  $common_arguments = array(
+    'source_connection' => 'legacy',
+    'source_version' => 7,
+  );
+
+  // For vocabulary migrations, source_vocabulary and destination_vocabulary are
+  // required arguments. Note that in Drupal 7 vocabularies did not have machine
+  // names, so we use the vocabulary ID to uniquely identify them.
+  $vocabulary_arguments = array(
+    array(
+      'description' => t('Migration of Activity terms from Drupal 7'),
+      'machine_name' => 'Activity',
+      'source_vocabulary' => 'vocabulary_5',  // D7 Vocabulary ID
+      'destination_vocabulary' => 'vocabulary_5',
+    ),
+    array(
+      'description' => t('Migration of Ocean terms from Drupal 7'),
+      'machine_name' => 'Ocean',
+      'source_vocabulary' => 'vocabulary_6',  // D7 Vocabulary ID
+      'destination_vocabulary' => 'vocabulary_6',
+    ),
+    array(
+      'description' => t('Migration of Max Temperature Category terms from Drupal 7'),
+      'machine_name' => 'MaxTemperatureCategory',
+      'source_vocabulary' => 'vocabulary_7',  // D7 Vocabulary ID
+      'destination_vocabulary' => 'vocabulary_7',
+    ),
+    array(
+      'description' => t('Migration of Tectonic setting terms from Drupal 7'),
+      'machine_name' => 'TectonicSetting',
+      'source_vocabulary' => 'vocabulary_8',  // D7 Vocabulary ID
+      'destination_vocabulary' => 'vocabulary_8',
+    ),
+    array(
+      'description' => t('Migration of National Jurisdiction terms from Drupal 7'),
+      'machine_name' => 'NationalJurisdiction',
+      'source_vocabulary' => 'vocabulary_13',  // D7 Vocabulary ID
+      'destination_vocabulary' => 'vocabulary_13',
+    ),
+    array(
+      'description' => t('Migration of Region terms from Drupal 7'),
+      'machine_name' => 'Region',
+      'source_vocabulary' => 'vocabulary_14',  // D7 Vocabulary ID
+      'destination_vocabulary' => 'vocabulary_14',
+    ),
+    array(
+      'description' => t('Migration of MGDS_FeatureID terms from Drupal 7'),
+      'machine_name' => 'MGDS_FeatureID',
+      'source_vocabulary' => 'vocabulary_19',  // D7 Vocabulary ID
+      'destination_vocabulary' => 'vocabulary_19',
+    ),
+  );
+
+  // Again, we're using the migrate_d2d class directly.
+  // The soft dependency says that while we don't have to run the user migration
+  // first, we want to make sure it's listed first so the vocubularies are
+  // listed right ahead of the node migrations.
+   $common_vocabulary_arguments = $common_arguments + array(
+    'class_name' => 'DrupalTerm7Migration',
+  );
+  foreach ($vocabulary_arguments as $arguments) {
+    $arguments += $common_vocabulary_arguments;
+    Migration::registerMigration($arguments['class_name'], $arguments['machine_name'],
+                                 $arguments);
+  }
+
+  // Node migrations - each has its own class derived from the migrate_d2d class,
+  // specifying its particular field mappings and transformations. source_type
+  // and destination_type are required arguments.
+  $node_arguments = array(
+    array(
+      'class_name' => 'VentFieldMigration',
+      'description' => t('Migration of vent nodes from Drupal 7'),
+      'machine_name' => 'VentField',
+      'source_type' => 'ventfield',
+      'destination_type' => 'ventfield',
+    ),
+    array(
+      'class_name' => 'PageMigration',
+      'description' => t('Migration of page nodes from Drupal 7'),
+      'machine_name' => 'Page',
+      'source_type' => 'page',
+      'destination_type' => 'page',
+    ),
+    array(
+      'class_name' => 'StoryMigration',
+      'description' => t('Migration of story nodes from Drupal 7'),
+      'machine_name' => 'Story',
+      'source_type' => 'story',
+      'destination_type' => 'article',
+    ),
+  );
+  foreach ($node_arguments as $arguments) {
+    $arguments = array_merge_recursive($arguments, $common_arguments);
+    Migration::registerMigration($arguments['class_name'], $arguments['machine_name'],
+                                 $arguments);
+  }
+}
+
+/**
+ * Implements hook_migrate_api().
+ */
+function migrate_irvents_migrate_api() {
+  $api = array(
+    'api' => 2,
+  );
+  return $api;
+}

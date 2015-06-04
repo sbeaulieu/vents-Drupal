@@ -1,0 +1,51 @@
+<?php
+/**
+ * @file
+ * Code for the irvents-content-type-plus-taxonomy-feature feature.
+ */
+
+include_once 'irvents_content_type_plus_taxonomy_feature.features.inc';
+
+/*
+ * Implement hook_form_FORM_ID_alter()
+ *
+ * Disable/grey out the geofield lat/lon which are duplicates
+ *
+ */
+function irvents_content_type_plus_taxonomy_feature_form_ventfield_node_form_alter(&$form, &$Form_state, $form_id){
+  
+  $form['field_geofield_lat_and_lon'][LANGUAGE_NONE][0]['lat']['#disabled'] = TRUE;
+  $form['field_geofield_lat_and_lon'][LANGUAGE_NONE][0]['lon']['#disabled'] = TRUE;
+  //dpm($form);
+}
+ 
+/** 
+ * Implements hook hook_node_presave()
+ * 
+ * When a 'ventfield' node is saved, and fields: 'field_latitude4' or 'field_longitude4' 
+ * 
+ *  have a value, set the value of the field: 'field_geofield_lat_and_lon'
+ *
+ *  to be: 'POINT (<field_longitude4> <field_latitude4>)'
+ *
+ */
+function irvents_content_type_plus_taxonomy_feature_node_presave($node){
+  
+  if( $node->type == 'ventfield'){
+    $lat = isset($node->field_latitude4[LANGUAGE_NONE][0]['value']) ? $node->field_latitude4[LANGUAGE_NONE][0]['value'] : '';
+    $lon = isset($node->field_longitude4[LANGUAGE_NONE][0]['value']) ? $node->field_longitude4[LANGUAGE_NONE][0]['value'] : '';
+    
+    if( !empty($lat) && !empty($lon) ){
+      $node->field_geofield_lat_and_lon[LANGUAGE_NONE][0] = array(
+        'wkt' =>'POINT ('.$lon.' '.$lat.')',
+        'geo_type' => 'point',
+        'lat' => $lat,
+        'lon' => $lon,
+        'top' => $lat,
+        'bottom' => $lat,
+        'right' => $lon,
+        'left' => $lon,
+      );
+    }
+  }
+}

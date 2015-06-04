@@ -1,0 +1,11 @@
+name = "Migrate IRVents"
+description = "Migrate content from D7 site to D7"
+package = "IRVents"
+core = 7.x
+
+dependencies[] = migrate
+dependencies[] = migrate_d2d
+
+files[] = node.inc
+
+;see the local.settings.php file for this site to configure the legacy database connection

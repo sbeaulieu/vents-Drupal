@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the irvents-rdfmapping-features feature.
+ */
+
+include_once 'irvents_rdfmapping_features.features.inc';
