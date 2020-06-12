@@ -1,0 +1,21 @@
+column_header_vent_fields_all_20200325cleansorted,definition
+Name.ID,a unique name identifier for each vent field
+Name.Alias.es.,other names used in the literature for the same vent field
+Vent.Sites,names of individual vent sites contained within the vent field
+Activity,"hydrothermal activity categorized to active, confirmed; active, inferred; or inactive. We consider the activity confirmed when indicated by visual observations at the sea floor that may or may not also include temperature measurements. Please note the database is not comprehensive for inactive vent fields."
+Maximum.Temperature,maximum temperature for confirmed active vent fields in degrees Celsius
+Max.Temperature.Category,maximum temperature category for confirmed active vent fields categorized to High; Low; or NotProvided. For inferred active there is no value entered (blank) and for inactive NotApplicable.
+Latitude,latitude of the vent field in decimal degrees to four decimal places north positive
+Longitude,longitude of the vent field in decimal degrees to four decimal places east positive
+Ocean,"ocean categories match the InterRidge Cruise Database: Arctic; Indian; Mediterranean; N. Atlantic; N. Pacific; S. Atlantic; S. Pacific; or Southern. Following the standards of the International Hydrographic Organization, the Arctic Ocean includes the mid-ocean ridge north of Iceland, and the Southern Ocean is defined as south of latitude 60 S."
+Region,region generally indicates the regional setting of the vent field along the world plate boundaries. Exceptions include vent fields at intra-plate volcanoes and coastal faults.
+National.Jurisdiction,"National jurisdiction within exclusive economic zones (EEZs) was determined by querying the Maritime Boundaries Geodatabase VLIZ, 2019, doi:10.14284/382 using the latitude and longitude for each vent field. Positions outside of EEZs are reported as high seas; note that these are seafloor positions thus they may lie either in The Area (the seafloor beyond the limits of national jurisdiction) or on extended continental shelves."
+Maximum.or.Single.Reported.Depth,maximum or single reported depth below sea level in meters
+Minimum.Depth,minimum depth below sea level in meters
+Tectonic.setting,tectonic setting categorized to mid-ocean ridge; back-arc spreading center; arc volcano; intra-plate volcano; or other. Other settings are mainly coastal faults.
+Full.Spreading.Rate..mm.a.,"full spreading rate for vent fields at mid-ocean ridge or back-arc spreading center from Bird, 2003, doi:10.1029/2001GC000252, accessed via GeoMapApp, with the exception of literature values for New Hebrides, Tyrrhenian, and Izu-Bonin back-arc regions"
+Notes.on.Vent.Field.Description,"Notes describing the vent field are generally quoted directly from the literature. However, some of the site descriptions remain from older versions of the InterRidge Vents Database. This column in the data table also contains notes relevant to other columns, for example, providing more information on the region or tectonic setting."
+Notes.Relevant.to.Biology,"Notes on biology are generally quoted directly from the literature. However, some of these notes remain from older versions of the InterRidge Vents Database."
+Year.and.How.Discovered..if.active..visual.confirmation.is.listed.first.,"For the year and means by which discovered, visual confirmation at the sea floor is listed first, unless otherwise noted. Other information related to the discovery is listed in chronological order."
+Discovery.References..text.,References associated with the discovery of the vent field. References [in brackets] were not consulted in full.
+Other.References..text.,Other references relevant to the vent field. References [in brackets] were not consulted in full.
